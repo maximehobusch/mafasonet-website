@@ -1,0 +1,139 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chat</title>
+<script src="styleloader.js"></script>
+<script src="communikation.js"></script>
+<script src="chat.js"></script>
+<link rel="stylesheet" type="text/css" href="main.css" title="main">
+
+<!link rel="alternate stylesheet" type="text/css" href="bg/farben1.css" title="background:farben1">
+<!link rel="alternate stylesheet" type="text/css" href="bg/bricks.css" title="background:bricks">
+<!link rel="alternate stylesheet" type="text/css" href="bg/skyline_zeichnung.css" title="background:skyline_zeichnung">
+<!link rel="alternate stylesheet" type="text/css" href="bg/fraktal1.css" title="background:fraktal1">
+<!link rel="alternate stylesheet" type="text/css" href="bg/fraktal2.css" title="background:fraktal2">
+<!link rel="alternate stylesheet" type="text/css" href="bg/fraktal3.css" title="background:fraktal3">
+<!link rel="alternate stylesheet" type="text/css" href="bg/fraktal4.css" title="background:fraktal4">
+<!link rel="alternate stylesheet" type="text/css" href="bg/fraktal5.css" title="background:fraktal5">
+<style>
+.loading {position: fixed; top:25%; left:25%; width:50%; height:50%; background-color:rgba(255,255,255,0.9); border-radius: 10px; text-align:center; overflow:hidden}
+.loadingpoint {position: absolute; top:calc(50% - 25px); width:50px; height:50px ; border-radius:50%; animation:loadingpointanim 1s alternate infinite cubic-bezier(1,-0.8,.96,1.49); animation-delay: 1s; }
+@keyframes loadingpointanim {
+  from { opacity:1} to { opacity:0; transform: translatey(400%);}
+}
+</style>
+</head>
+<body bgcolor="#AAAAAA">
+<div id="all" style="display:none">
+<div id="unsignedInMenubar" class="menubardiv">
+
+<table width="100%" style="margin:0px" border="0" height="100%">
+<tr border="0">
+		<td width="37.5%"  align="center" style="vertical-align:top" margin="0px" border="0">
+		</td>
+		<td width="25%" align="center" style="vertical-align:top"><br><br><br><p><div id="newuseroff"><form name="newuseroff"><input type="button" class="menuButton2" value="Registrieren" onclick="setVisibleOfAndOther('newuser',true,false);setVisibleOf('pwaeoff',true);setVisibleOf('signinoff',true);"></form></div>
+<div id="newuser" class="form">
+<form name="newuser" style="background-color:var(--bgcolor3);margin:0px; padding:0px;border-radius:14px">	<input type="text" class="Inputtop" placeholder="User-Id eingeben" name="userid"><br>
+	<input type="password" class="Inputmiddle" placeholder="Passwort eingeben" name="password"><br>
+<input id="pwd2" type="password" class="Inputbottom" placeholder="Passwort wiederholen" name="password2"><br>
+<div align="right">		<input type="button" class="Button" value=" Neu Registrieren " onclick="if (password.value == password2.value) {usernew(userid.value,password.value)} else errpwd('pwd2')"></div>
+	</form>
+</div></p><p><div id="signinoff"><input type="button" class="menuButton2" value="Anmelden" onclick="setVisibleOfAndOther('signin',true,false);setVisibleOf('pwaeoff',true);setVisibleOf('newuseroff',true);"></div>
+<div id="signin" class="form">
+	<form name="anm" style="background-color:var(--bgcolor3);margin:0px; padding:0px;border-radius:14px; border-top-width:10;border-top-color:var(--bordercolor2);width:100%">
+	<input type="text" class="Inputtop" placeholder="User-Id eingeben" name="userid"><br>
+	<input id="pwd1" type="password" class="Inputbottom" placeholder="Passwort eingeben" name="password"><br>
+	<div align="right">	<input type="button" class="Button" value=" Anmelden " onclick="signin(userid.value,password.value);"></div>
+	</form>
+</div></p><p><div id="pwaeoff"><input type="button" class="menuButton2" value="Passwort &auml;ndern" onclick="setVisibleOfAndOther('pwae',true,false);setVisibleOf('newuseroff',true);setVisibleOf('signinoff',true);"></div>
+			<div id="pwae" class="form">
+	<form name="pwae" style="background-color:var(--bgcolor3);margin:0px; padding:0px;border-radius:14px; border-top-width:10;border-top-color:var(--bordercolor2);width:100%">
+	<input type="text" class="Inputtop" placeholder="User-Id eingeben" name="userid"><br>
+<input type="password" class="Inputmiddle" placeholder="altes Passwort eingeben" name="passwordA"><br>
+<input type="password" class="Inputmiddle" placeholder="neues Passwort eingeben" name="passwordN"><br>
+<input id="pwd3" type="password"  class="Inputbottom" placeholder="neues Passwort wiederholen" name="passwordN2"><br>
+	<div align="right">	<input type="button" class="Button" value=" Passwort ändern " onclick="if (passwordN.value == passwordN2.value) {setpwd(userid.value,passwordA.value,passwordN.value)} else errpwd('pwd3')"></div>
+	</form>
+</div></p>
+		</td>
+		<td width="33.33333%" align="center" style="vertical-align:top">
+		</td>
+	</tr></table></div>
+<div id="signedInMenubar" class="menubardiv">
+<div  border="0" margin="0" id="chatgruppen" align="center">
+<table width="100%" margin="0px" border="0" style="vertical-align:top" height="10%"><tr border="0" style="vertical-align:top" height="25%">
+<td width="33.3333%" align="center" style="vertical-align:top" margin="0px" border="0" ><div id="newgroupoff"><input type="button" class="menuButton" value="Neue Gruppe" onclick="setVisibleOf('neuegruppe',true);setVisibleOf('pwaeoffin',true);setVisibleOf('newgroupoff',false);setVisibleOf('pwaeoffin',true);setVisibleOf('profil',false);setVisibleOf('editprofiloff',true);setVisibleOf('pwaein',false)"></div><div id="neuegruppe" class="form">
+	<form name="ng" style="background-color:var(--bgcolor3);margin:0px; padding:0px;border-radius:14px"><input type="text" class="newgroupin" style="width:75%" placeholder="Gruppen-Id eingeben" name="grid"><input type="button" class="newgroupbutton" style="width:25%" value="erstellen" onclick="groupnew(grid.value); setVisibleOfAndOther('chatgruppen',true,false)">	<br>Teilnehmer können nach erstellen hinzugefügt werden.
+	</form>
+</div></td>	<td width="33.33333%" align="center" style="vertical-align:top" margin="0px" border="0"><div id="editprofiloff"><input type="button" class="menuButton" value="Profil" onclick="setVisibleOf('neuegruppe',false);setVisibleOf('pwaeoffin',true);setVisibleOf('newgroupoff',true);setVisibleOf('pwaeoffin',true);setVisibleOf('profil',true);setVisibleOf('editprofiloff',false);setVisibleOf('pwaein',false)"></div>
+<div id="profil" class="form">
+	<form name="profil">
+<div style="background-color:var(--bgcolor3);border-radius:14px; border-color:var(--bordercolor1)"><input type="text" class="newgroupin" style="width:78%" placeholder="Namen eingeben" name="namen"><input type="button" class="newgroupbutton" style="width:22%" value="ändern" onclick="setusermeta(JSON.stringify({'n':namen.value}));"></div></form>
+</div></td>
+<td width="33.33333%" align="center" style="vertical-align:top"><div id="pwaeoffin"><input type="button" class="menuButton" value="Passwort &auml;ndern" onclick="setVisibleOf('neuegruppe',false);setVisibleOf('pwaeoffin',false);setVisibleOf('newgroupoff',true);setVisibleOf('pwaeoffin',false);setVisibleOf('profil',false);setVisibleOf('editprofiloff',true);setVisibleOf('pwaein',true)"></div>
+			<div id="pwaein" class="form">
+	<form name="pwaein" style="background-color:var(--bgcolor3);margin:0px; padding:0px;border-radius:14px">
+	<input type="text" class="Inputtop" placeholder="User-Id eingeben" name="userid"><br>
+<input type="password" class="Inputmiddle" placeholder="altes Passwort eingeben" name="passwordA"><br>
+<input type="password" class="Inputmiddle" placeholder="neues Passwort eingeben" name="passwordN"><br>
+<input id="pwd4" type="password" class="Inputbottom" placeholder="neues Passwort wiederholen" name="passwordN2"><br>
+		<div align="right"><input type="button" class="Button" value=" Passwort ändern " onclick="if (passwordN.value == passwordN2.value) {setpwd(userid.value,passwordA.value,passwordN.value)} else errpwd('pwd4')"></div>
+	</form>
+</div>
+		</td></tr></table>
+
+	<div class="chatgruppenfield" align="center">
+		Gruppen, zu denen du Zutritt hast:
+		<div id="chatgruppenfield" align="center" overflow-y="scroll" height="60%">Wird geladen...</div>
+	</div></div></div>
+
+<div id="gruppenchat" style="width:100%; height:10%; margin:0; border-width:0; background-color:transparent">
+<form name="cht">
+<div class="Buttonn" style="width:100%; overflow-x: auto; overflow-y: scroll; font-size:16px; border-radius:14px 14px 0px 0px; margin:0px">
+<div id="nmlcht" align="justify" class="Buttonn"><table style="height:40px;width=100%" class="Buttonn" border-radius="100px" border="0"><tr><td width="98%"><div id="gruppenname"><input type="button" class="Buttonn" style="border-radius:14px;font-size:16px;border-width:1;border-style:solid" value="⇦" onclick="setVisibleOf('chatgruppen',true);setVisibleOf('gruppenchat',false)"> Keine Chatgruppe ausgewählt!</div></td><td width="2%" align="right"><input type="button" class="Buttonn" style="border-radius:100px;font-size:20px;border-width:3;border-style:solid"" value="&nbsp;⚙&nbsp;" onclick="setVisibleOf('nmlcht',false);setVisibleOf('unmlcht',true)"></td></tr></table></div>
+<div id="unmlcht" align="left" width="100%"><table height="40px" border="0" class="Buttonn" border-radius="100px" width="100%"><tr><td><input type="button" class="Buttonn" style="border-radius:14px;font-size:16px;border-width:1;border-style:solid;padding:1px" value="⇦&nbsp;" onclick="setVisibleOf('nmlcht',true);setVisibleOf('unmlcht',false)">&nbsp;<input type="text" height="14%" class="newgroupin" placeholder="User-Id" name="usrid"><input type="button" height="14%" class="newgroupbutton" style="border-radius:0px;background-color:var(--bgcolorGoodButton)" height="10%" value="Hinzufügen" onclick="hinz(usrid.value)"><input type="button" height="14%" class="newgroupbutton" style="background-color:var(--bgcolorBadButton)" height="14%" value="Entfernen" onclick="entf(usrid.value)">
+		<input type="text" height="14%" class="newgroupin"  height="14%" placeholder="Gruppenname" name="gruname"><input height="14%" type="button" class="newgroupbutton" height="14%" value="aktualisieren" onclick="setgroupmeta(showGruppe,JSON.stringify({'n':gruname.value}));"></td></tr></table></div></div>
+		<div id="chatfield" align="center" style="height:100%">
+			<div class="chatvaluef" id="chatvalued" style="height:calc(100% - 100px);">Wird geladen...</div>
+<table width="100%" style="position:absolute; bottom:0px; height:60px"><tr style="height:100%"><td><input type="text" class="newgroupin" placeholder="Nachricht..." name="msg" id="msg" value="" style="width:88%;background-color:var(--bgcolorMessageWriter); height:100%; font-size:30;" align="right"><input type="button" value="Senden" class="newgroupbutton" border-size-bottom="2px" style="width:12%; height:100%; font-size:30;" onclick="sendMessage(showGruppe,msg.value); msg.value = '';">
+	</td></tr><tr></tr></table>
+</div>
+	</form></div>
+</div>
+<div id="loading" class="loading">
+	<span class="loadingpoint" style="background-color: #FF0000; animation-delay: 0s; left:calc(8.33% - 25px);"></span>
+	<span class="loadingpoint" style="background-color: #FFFF00; animation-delay: 0.1s; left:calc(25% - 25px);"></span>
+	<span class="loadingpoint" style="background-color: #00FF00; animation-delay: 0.2s; left:calc(41.67% - 25px);"></span>
+	<span class="loadingpoint" style="background-color: #00FFFF; animation-delay: 0.3s; left:calc(58.33% - 25px);"></span>
+	<span class="loadingpoint" style="background-color: #0000FF; animation-delay: 0.4s; left:calc(75% - 25px);"></span>
+	<span class="loadingpoint" style="background-color: #FF00FF; animation-delay: 0.5s; left:calc(91.67% - 25px);"></span>
+</div>
+
+
+<div class="styleminibutton" id="styleminibutton" onclick="changeStyleminibutton(); ">✎</div>
+
+<div id="styleconfig" class="styleconfig" style="display:none">
+<h1 id="styleconfigcat">Style categorie: background</h1>
+<select id="styleconfigselect" class="styleconfigselect"></select><br>
+<input type="button" class="styleconfigclosebutton" value="ok" onclick="setStyle(document.getElementById('styleconfigselect').value,showStyleconfigfieldCategorie); hideContent('styleconfig');"><input type="button" class="styleconfigcancelbutton" value="abbrechen" onclick="hideContent('styleconfig');">
+</div>
+
+<div id="fjangsalert" class="fjangsalert" style="display:none">
+<pre id="fjangsalertfield" class="fjangsalertfield">HTML escaped Textfield
+Newline
+	Tab
+Newline</pre>
+<input type="button" id="fjangsalertclosebutton" class="fjangsalertclosebutton" value="ok" onclick="hideContent('fjangsalert');">
+</div>
+
+<audio id="msgsound">
+  <source src="msgsound.mp3" type="audio/mpeg">
+  <source src="msgsound.ogg" type="audio/ogg">
+  <source src="msgsound.wav" type="audio/wav">
+  Audio nicht unterstützt!
+</audio>
+
+
+
+</body>
+</html>

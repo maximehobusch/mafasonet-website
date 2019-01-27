@@ -1,0 +1,45 @@
+input {
+	border-style:solid;
+}
+.newgroupin { background-color:var(--bgcolor2);color:var(--textcolor1);border-color:var(--bordercolor1);font-size:16px;border-radius:14px 0px 0px 14px;border-width:2; border-color:var(--bordercolor1); border-style:solid; text-align: center; margin: 0px; font-size: 100%;  overflow: hidden;}
+.newgroupbutton {border-radius: 0px 14px 14px 0px; background-color:var(--bgcolorButton); border-width:2; border-color:var(--bordercolor1);color:var(--textcolor2); border-style:solid; text-align: center; margin: 0px; font-size: 100%; overflow: hidden;}
+.chattable {border-radius: 10px; width:100%; background-color:var(--bgcolor2); overflow-y: scroll; overflow-x: auto}
+.chatline {border-width:2; border-color:var(--bordercolor1); border-style:solid}
+.chatfield {border-radius: 10px; width:100%; background-color:var(--bgcolor2); overflow-y: scroll; overflow-x: auto}
+.messagefieldMe {border-radius: 17px 17px 0px 14px; background-color:var(--bgcolorMe); border-width:2;border-color:var(--bordercolor1); border-style:solid; text-align: right; padding: 3px; margin: 3px; font-size: 12px;color:var(--textcolorMe);width:auto}
+.messagefieldOther {border-radius: 17px 17px 14px 0px; background-color: var(--bgcolorOther); border-width:2; border-color:var(--bordercolor1);border-style:solid; text-align: left; padding: 3px; margin: 3px; font-size: 12px; color:var(--textcolorOther)}
+.messagefieldMaster {border-radius: 100px; background-color: var(--bgcolorMaster); border-width:2; border-color:var(--bordercolor1); border-style:solid; text-align: center; padding: 5px; margin: 3px; font-size: 12px;color:var(--textcolorMaster)}
+.sendertext {font-weight: bold; font-size: 12px; text-decoration: underline; border-radius:14px 14px 0px 14px}
+.datetext {font-size: 10px}
+.chatvaluef {border-radius: 0px 0px 14px 14px; background-color:var(--bgcolor2); overflow-y: scroll; overflow-x: auto; width:100%}
+.klickbartext {border-radius: 5px 5px 5px 5px; background-color: var(--bgcolorLink); color:var(--textcolorLink)}
+.menubardiv {background-color:var(--bgcolor2); color:var(--textcolorMenubardiv); width:100%; margin:0px; padding:0px;border-radius:0px 0px 14px 14px;border-bottom-width:10; height:0%}
+.menuButton {background-color:var(--bgcolor2);color:var(--textcolor1);font-size:100%; width:100%; border-color:var(--bordercolor1);border-radius:14px; height:100%;border-style:solid}
+.Button {background-color:var(--bgcolorButton);color:var(--textcolor2);border-color:var(--bordercolor1);font-size:16px;border-radius:0px 0px 14px 14px;border-top-width:0; padding:0px; border-style:solid}
+.Buttonn {background-color:var(--bgcolor1);color:var(--textcolor1);border-color:var(--bordercolor1);font-size:100%;border-radius:14px;border-width:0; padding:0px;border-style:solid}
+.groupbutton {background-color:var(--bgcolor1);color:var(--textcolor1);border-color:var(--bordercolor1);font-size:16px;border-radius:14px; padding:4px; border-style:solid}
+.Input {background-color:var(--bgcolor1);color:var(--textcolor1);border-color:var(--bordercolor1);font-size:16px;border-radius:14px; text-align: center; border-style:solid}
+.Inputtop {background-color:var(--bgcolor1);color:var(--textcolor1);border-color:var(--bordercolor1);font-size:16px;border-radius:14px 14px 0px 0px; text-align: center; width:100%; border-style:solid}
+.Inputbottom {background-color:var(--bgcolor1);color:var(--textcolor1);border-color:var(--bordercolor1);font-size:16px;border-radius:0px 0px 0px 14px; border-top-width:0; text-align: center; width:100%; border-style:solid}
+.pwderr {
+	animation:errbtm 0.4s alternate 20 ease-in-out;
+background-color:var(--bgcolorError);color:var(--textcolorError);border-color:var(--bordercolor1);font-size:16px;border-radius:0px 0px 0px 14px; border-top-width:0; text-align: center; width:100%; border-style:solid
+}
+@keyframes errbtm{
+from{background-color:var(--bgcolor1);color:var(--textcolor1);border-color:var(--bordercolor1);font-size:16px;border-radius:0px 0px 0px 14px; border-top-width:0; text-align: center; width:100%} to{background-color:var(--bgcolorError);color:var(--textcolorError);border-color:var(--bordercolor1);font-size:16px;border-radius:0px 0px 0px 14px; border-top-width:0; text-align: center; width:100%}
+ }
+
+.Inputmiddle {background-color:var(--bgcolor1);font-size:16px;color:var(--textcolor1);border-color:var(--bordercolor1);border-radius:0px; border-top-width:0; text-align: center; width:100%; border-style:solid}
+.menuButton2 {background-color:var(--bgcolor2);color:var(--textcolor1);font-size:40px; height:25%; width:100%; border-color:var(--bordercolor1);border-radius:20px;border-style:solid;border-width:2px;padding:20px}
+.chatgruppenfield {border-radius: 14px; width:100%; background-color:var(--bgcolor2); overflow-y: scroll; overflow-x: auto; height:90%}
+body {margin:0px; padding:0px; overflow-x: hidden; overflow-y: hidden; color:var(--textcolor1)}
+.form {text-align:center; background-color:var(--bgcolor2); width:100%; margin:0px; padding:0px;border-radius:0px 0px 14px 14px}
+.fjangsalert {position: absolute; border-style:solid; border-color:var(--bordercolor1); background-color:var(--bgcolorAlert); top:30%; left:30%; width:40%; height:40%; border-radius:20px; padding:10px; }
+.fjangsalertfield {text-align: center; font-family: monospace; font-size:30px; overflow:auto; height: calc(100% - 70px); color:var(--textcolorAlert)}
+.fjangsalertclosebutton {position: absolute; bottom: 10px; width:calc(100% - 20px); background-color:var(--bgcolorGoodButton); border-color:var(--bordercolor1); border-radius: 14px; font-size:30px; font-family: monospace;}
+.styleconfig {position: absolute; background-color:var(--bgcolorAlert); top:30%; left:30%; width:40%; height:40%; border-radius:20px; padding:10px; }
+.styleconfigselect {text-align: center; font-family: monospace; font-size:30px; overflow:auto;}
+.styleconfigclosebutton {position: absolute; bottom: 10px; left:10px; width:calc(50% - 10px); background-color:var(--bgcolorGoodButton); border-color:var(--bordercolor1); border-radius: 14px; font-size:30px; font-family: monospace;}
+.styleconfigcancelbutton {position: absolute; bottom: 10px; right:10px; width:calc(50% - 10px); background-color:var(--bgcolorBadButton); border-color:var(--bordercolor1); border-radius: 14px; font-size:30px; font-family: monospace;}
+.styleminibutton {border-style:solid; border-color:var(--bordercolor1);position: absolute; top:40px; left:20px; padding:10px 10px; background-color:var(--bgcolorStyleMiniButton); border-radius:20px; font-family: monospace; font-size:35px; transition: width 0.3s, height 0.4s; width:40px; height:40px; overflow:hidden; text-align:center}
+.stylecatbutton {width:100%; background-color:var(--bgcolorStyleCategorieButton); border-color:var(--bordercolor1); border-radius: 14px; font-size:30px; font-family: monospace; margin:4px}

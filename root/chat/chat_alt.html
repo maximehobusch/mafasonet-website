@@ -1,0 +1,312 @@
+<html>
+<head>
+<title>Mafasonet Chat</title>
+<script src="communikation.js"></script>
+<script>
+var showGruppe = undefined;
+var chatgruppenfeldAlt = "";
+var chatvalueAlt = "";
+var cvscrollBottom = true;
+var meMeta = "";
+var groupinfoAlt = [];
+var numberMessagesReaded = [];
+var logInAlt = undefined;
+var AUF_EINMAL_LADEN = 10;
+var allContentFields = ["neuegruppe","newuser","signin","chatgruppen","gruppenchat","pwae","profil"];
+onload = function() {
+	window.setInterval(draw,250);
+	setVisibleOfAndOther("signin",true,false);
+	setVisibleOf("signedInMenubar",false);
+	Notification.requestPermission();
+//	new Notification("Mafasonet Chat", {"icon":"/img/MafasonetChat.png","body":"Neue Nachrichten werden ab sofort hier angezeigt"});
+}
+function draw() {
+	if (connectedUser != undefined) if (JSON.stringify(meMeta) != JSON.stringify(getUserMetaById(connectedUser))) {
+		meMeta = getUserMetaById(connectedUser);
+		refreshProfileFields(meMeta);
+	}
+	if (logInAlt != logIn && logIn == true) {
+		setVisibleOf("unSignInMenubar",false);
+		setVisibleOf("signedInMenubar",true);
+		setVisibleOfAndOther("chatgruppen",true,false);
+	}
+	logInAlt = logIn;
+	printGruppenAuswahl();
+	printChat();
+	checkBing();
+}
+function printGruppenAuswahl() {
+	if (grouplist == undefined) return;
+	var s = "";
+	for (var a = 0; a < grouplist.length; a++) {
+		s = s + "<input type=\"button\" class=\"groupbutton\" value=\"" + gruppenText(grouplist[a]) + "\" onclick=\"gruppeAusaehlen('" + grouplist[a] + "')\"><br>";
+	}
+
+	if (chatgruppenfeldAlt != s) document.getElementById("chatgruppenfeld").innerHTML = s;
+	chatgruppenfeldAlt = s;
+}
+
+function autoscroll() {
+	if (cvscrollBottom) {
+		var cv = document.getElementById("chatfield");
+		cv.scrollTop = cv.scrollHeight - cv.clientHeight;
+	}
+}
+function checkScrollBottom() {
+	var cv = document.getElementById("chatfield");
+	cvscrollBottom = Math.abs(cv.scrollTop - (cv.scrollHeight - cv.clientHeight)) < 25;
+}
+
+function printChat() {
+	document.getElementById("gruppenname").innerHTML = gruppenHTMLText(showGruppe);
+	if (showGruppe == null) return;
+	if (messageHeads[showGruppe] == null) return;
+	checkScrollBottom();
+	var s = "Nachrichten:<br>";
+	var a = 0;
+	for (a = 0; a < messageHeads[showGruppe].length; a++) {
+		if (messageHeads[showGruppe][a] != undefined) break;
+	}
+	if (a != 0) s = s + moreDownloadDiv(Math.max(0,a-AUF_EINMAL_LADEN),Math.min(a,AUF_EINMAL_LADEN),a);
+
+	for (undefined; a < messageHeads[showGruppe].length; a++) {
+		s = s + nachrichtHTML(messageHeads[showGruppe][a],a) + "";
+	}
+	if (chatvalueAlt != s) {
+		document.getElementById("chatvalued").innerHTML = s;
+		autoscroll();
+	}
+	chatvalueAlt = s;
+	var inf = getGroupInfoById(showGruppe);
+	if (inf != undefined) {
+		numberMessagesReaded[showGruppe] = inf.messages;
+	}
+}
+function nachrichtHTML(m,num) {
+	if (m == undefined) return "<div class=\"messagefieldMaster\" onclick=\"messageheads(showGruppe,1," + num + ");\">Ungeladener Nachrichtenkopf<br>Klicken um manuel herunterzuladen</div>"
+	if (m.status != "ok") return "<div class=\"messagefieldMaster\">Fehlerhafte Nachricht:<br>" + m.status + "</div>";
+	var classs = "messagefieldOther";
+	if (m.sender == connectedUser) classs = "messagefieldMe";
+	if (m.sender == "mafasonetchatmaster") classs = "messagefieldMaster";
+	return "<div class=\"" + classs + "\"><span class=\"sendertext\">" + senderHTMLText(m.sender) + "</span><br>" + getMessageValueHTML(m) + "<br><span class=\"datetext\">" + millisToDate(m.time) + "</span></div>";
+}
+function getMessageValueHTML(m) {
+	var v = getMessageValueById(m.id);
+	if (v == undefined) return "Inhalt der Nachricht " + m.id + " nicht geladen<br><span class=\"klickbartext\" onclick=\"getmessagevalue('" + m.id + "')\">Hier Klicken um manuel herunterzuladen</span>";
+	return v;
+}
+function moreDownloadDiv(st,num,gesamtUngeladen) {
+	return "<div class=\"messagefieldMaster\" onclick=\"messageheads(showGruppe," + num + "," + st + ");\">" + gesamtUngeladen + " ungeladene Nachrichten<br>Klicken um " + num + " weitere Nachrichtenköpfe zu laden</div>";
+}
+function senderHTMLText(senderId) {
+	var u = getUserMetaById(senderId);
+	if (u == undefined) return "uid: " + senderId;
+	return "<span title=\"uid: " + senderId + "\" onclick=\"alert('uid: " + senderId + "');\">" + u.n + "</span>";
+}
+function gruppenText(gruppenId) { 
+	var gm = getGroupMetaById(gruppenId);
+	var gi = getGroupInfoById(gruppenId);
+	var s = "gid: " + gruppenId;
+	if (gm != undefined) s = gm.n + " (" + s + ")";
+	if (gi != undefined) {
+		s = s + " " + gi.members.length + " Gruppenmitglied(er)";
+		if (gi.messages != undefined) if (gi.messages != numberMessagesReaded[gruppenId]) {
+			if (numberMessagesReaded[gruppenId] == undefined) {
+				s = "[" + gi.messages + "] " + s;
+			} else {
+				s = "[" + (gi.messages-numberMessagesReaded[gruppenId]) + "] " + s;
+			}
+		}
+	}
+	return s;
+}
+function gruppenHTMLText(gruppenId) { 
+	var gm = getGroupMetaById(gruppenId);
+	var gi = getGroupInfoById(gruppenId);
+	var s = "gid: " + gruppenId;
+	if (gm != undefined) s = gm.n + "<br>(" + s + ")";
+	if (gi != undefined) s = s + "<br>Gruppenmitglied(er): " + gi.members + "; " + gi.messages + " Nachrichten</h3>";
+	return s;
+}
+function millisToDate(millis) {
+	return new Date(millis).toString();
+}
+function gruppeAusaehlen(grid) {
+	setVisibleOfAndOther('gruppenchat',true,false);
+	showGruppe = grid;
+	document.getElementById("gruppenname").innerHTML = gruppenHTMLText(showGruppe);
+	setWathingGroup(grid);
+}
+function hinz(uid) {
+	addgroupmember(showGruppe,uid);
+}
+function entf(uid) {
+	removegroupmember(showGruppe,uid);
+}
+function hideContent(contentid) {
+	setVisibleOf(contentid,false);
+}
+function showContent(contentid) {
+	setVisibleOf(contentid,true);
+}
+function setVisibleOf(contentid,v) {
+	if (v) {
+		document.getElementById(contentid).style.display = "inline";
+	} else {
+		document.getElementById(contentid).style.display = "none";
+	}
+}
+function setVisibleOfAndOther(contentid,vc,vo) {
+	setVisibleOf(contentid,true);
+	for (var i = 0; i < allContentFields.length; i++) {
+		if (contentid != allContentFields[i]) setVisibleOf(allContentFields[i],vo);
+	}
+}
+function refreshProfileFields(m) {
+	if (m == undefined) {
+//		hideContent("profil");
+	} else {
+//		showContent("profil");
+		document.profil.namen.value = m.n;
+	}
+}
+
+function bing(ng,nn) {
+	document.getElementById("msgsound").currentTime = 0;
+	document.getElementById("msgsound").play();
+	window.navigator.vibrate([500,250,500,250,250,125,250,125,250]);
+	var s = "Gruppen:";
+	for (var a = 0; a < ng.length; a++) { 
+		s = s + "\n" + ng[a];
+	}
+	if (ng.length != 0) notify(ng.length + " Neue Gruppe(n)", {"icon":"/img/MafasonetChat.png","body":s},function() {setVisibleOfAndOther('chatgruppen',true,false); showGruppe = undefined;});
+	for (var a = 0; a < grouplist.length; a++) {
+		if (nn[grouplist[a]] != 0 && nn[grouplist[a]] != undefined) notify(nn[grouplist[a]] + " Neue Nachricht(en)", {"icon":"/img/MafasonetChat.png","body":"In Gruppe gid:" + grouplist[a]},function () {gruppeAusaehlen(grouplist[a])})
+	}
+
+}
+function notify(t,o,oncl) {
+	var n = new Notification(t,o);
+	n.onclick = oncl;
+}
+function checkBing() {
+	var ng = [];
+	var nn = {};
+	var bi = false;
+	if (grouplist == undefined) return;
+	for (var a = 0; a < grouplist.length; a++) {
+		nn[grouplist[a]] = 0;
+		var inf = getGroupInfoById(grouplist[a]);
+		if (inf == undefined) continue;
+		if (groupinfoAlt[grouplist[a]] == undefined) {
+			ng[ng.length] = grouplist[a];
+			bi = true;
+		} else if (groupinfoAlt[grouplist[a]].messages != inf.messages) {
+			nn[grouplist[a]]++;
+			bi = true;
+		}
+		if (bi) groupinfoAlt[grouplist[a]] = inf;
+
+	}
+	if (bi) bing(ng,nn);
+}
+
+
+</script>
+<style>
+.chattable {background-color:#EEEEEE; border-width:5; border-color:#000000; border-style:solid}
+.chatline {border-width:2; border-color:#222222; border-style:solid}
+.chatfield {border-width:1; border-color:#777777; border-style:solid}
+.messagefieldMe {border-radius: 40px 10px 0px 40px; background-color: #EEEEAA; border-width:1; border-color:#777777; border-style:solid; text-align: right; padding: 3px; margin: 3px; font-size: 12px}
+.messagefieldOther {border-radius: 10px 40px 40px 0px; background-color: #AAEEEE; border-width:1; border-color:#777777; border-style:solid; text-align: left; padding: 3px; margin: 3px; font-size: 12px}
+.messagefieldMaster {border-radius: 40px 40px 40px 40px; background-color: #FFAAAA; border-width:2; border-color:#777777; border-style:solid; text-align: center; padding: 3px; margin: 3px; font-size: 12px}
+.sendertext {font-weight: bold; font-size: 12px; text-decoration: underline;}
+.datetext {font-size: 10px}
+.chatvaluef {width:100%; background-color:#AAAAAA; overflow-x: auto; overflow-y: scroll;}
+.klickbartext {border-radius: 0px 5px 0px 5px; background-color: rgba(120,120,120,0.3); color:#0000AA}
+.menubardiv {background-color:#A0BBA8; width:100%; margin:0px; padding:0px}
+.menuButton {background-color:#B0CCB8;font-size:16px; width:33.33333%; height:5%}
+.menuButton2 {background-color:#B0CCB8;font-size:16px; width:25%; height:5%}
+.groupbutton {border-radius: 20px 40px 20px 40px; background-color: #88AAFF; border-width:2; border-color:#777777; border-style:solid; text-align: center; padding: 10px; margin: 3px; font-size: 25px; width:99%;  overflow: hidden;}
+.chatgruppenfield {width:100%; background-color:#BBAABB; overflow-x: auto; overflow-y: scroll;}
+body {margin:0px; padding:0px; overflow-x: hidden; overflow-y: hidden;}
+.form {text-align: center; border-width:2; border-style:solid; border-color:#000000; border-radius: 0px 5px 0px 5px;}
+</style>
+</head>
+<body bgcolor="#AAf7f7">
+<div id="unSignInMenubar" class="menubardiv"><input type="button" class="menuButton" value="Anmelden" onclick="setVisibleOfAndOther('signin',true,false);"><input type="button" class="menuButton" value="Registrieren" onclick="setVisibleOfAndOther('newuser',true,false);"><input type="button" class="menuButton" value="Passwort ändern" onclick="setVisibleOfAndOther('pwae',true,false);"></div>
+<div id="signedInMenubar" class="menubardiv"><input type="button" class="menuButton2" value="Gruppenauswahl" onclick="setVisibleOfAndOther('chatgruppen',true,false); showGruppe = undefined;"><input type="button" class="menuButton2" value="Neue Gruppe" onclick="setVisibleOfAndOther('neuegruppe',true,false); showGruppe = undefined;"><input type="button" class="menuButton2" value="Passwort ändern" onclick="setVisibleOfAndOther('pwae',true,false); showGruppe = undefined;"><input type="button" class="menuButton2" value="Profil" onclick="setVisibleOfAndOther('profil',true,false); showGruppe = undefined;"></div>
+<div id="signin" class="form">
+	<h2>Anmelden</h2>
+	<form name="anm">
+		User-Id:<input type="text" placeholder="User-Id" name="userid"><br>
+		Passwort:<input type="password" placeholder="Passwort" name="password"><br>
+		<input type="button" value="Anmelden" onclick="signin(userid.value,password.value);">
+	</form>
+</div>
+<div id="newuser" class="form">
+	<h2>Neu registrieren</h2>
+	<form name="newuser">
+		User-Id:<input type="text" placeholder="User-Id" name="userid"><br>
+		Passwort:<input type="password" placeholder="Passwort" name="password"><br>
+		Passwort Probe:<input type="password" placeholder="Passwort" name="password2"><br>
+		<input type="button" value="Neu Registrieren" onclick="if (password.value == password2.value) {usernew(userid.value,password.value)} else alert('Probe Passwort stimmt nicht');">
+	</form>
+</div>
+<div id="chatgruppen">
+	<div class="chatgruppenfield" style="height:95%;">
+		Gruppen, zu denen du Zutritt hast:
+		<div id="chatgruppenfeld">Ungeladen</div>
+		<input type="button" class="groupbutton" style="background-color:#AAFF66" value="Neue Gruppe" onclick="setVisibleOfAndOther('neuegruppe',true,false); showGruppe = undefined;">
+	</div>
+</div>
+	
+<div id="gruppenchat">
+<form name="cht">
+	<div class="groupbutton" style="width:95%; height:20%; overflow-x: auto; overflow-y: scroll; font-size:16px"><p id="gruppenname">Keine Chatgruppe ausgewählt!</p>
+
+		<input type="text" placeholder="User-Id" name="usrid"><input type="button" value="Hinzufügen" onclick="hinz(usrid.value)"><input type="button" value="Entfernen" onclick="entf(usrid.value)"><br>
+		<input type="text" placeholder="Gruppenname" name="gruname"><input type="button" value="aktualisieren" onclick="setgroupmeta(showGruppe,JSON.stringify({'n':gruname.value}));"></div>
+		<div class="chatvaluef" style="height:70%;" id="chatfield">
+			<p id="chatvalued">Ungeladen<p>
+			<input type="text" placeholder="Nachricht..." name="msg" value="" class="messagefieldMe" style="width:80%"><input type="button" value="Senden" class="messagefieldMaster" style="width:12%" onclick="sendMessage(showGruppe,msg.value); msg.value = '';">
+		</div>
+	</form>
+</div>
+<div id="neuegruppe" class="form">
+	<form name="ng">
+		<h2>Neue gruppe</h2>
+		Gruppen-Id:<input type="text" placeholder="Gruppen-Id" name="grid"><br>
+		Teilnehmer können hinzugefügt werden, nachdem die Gruppe erstellt wurde.<br>
+		<input type="button" class="groupbutton" value="Gruppe erstellen" onclick="groupnew(grid.value); setVisibleOfAndOther('chatgruppen',true,false)">
+	</form>
+</div>
+<div id="profil" class="form">
+	<h2>Profil</h2>
+	<form name="profil">
+		Name:<input type="text" placeholder="Name" name="namen"><br>
+		<input type="button" value="Profil ändern" onclick="setusermeta(JSON.stringify({'n':namen.value}));">
+	</form>
+</div>
+<div id="pwae" class="form">
+	<h2>Passwort ändern</h2>
+	<form name="pwae">
+		User-Id:<input type="text" placeholder="User-Id" name="userid"><br>
+		Passwort Alt:<input type="password" placeholder="Passwort" name="passwordA"><br>
+		Passwort Neu:<input type="password" placeholder="Passwort" name="passwordN"><br>
+		Passwort Neu Probe:<input type="password" placeholder="Passwort" name="passwordN2"><br>
+		<input type="button" value="Passwort ändern" onclick="if (passwordN.value == passwordN2.value) {setpwd(userid.value,passwordA.value,passwordN.value)} else alert('Probe Passwort stimmt nicht');">
+	</form>
+</div>
+
+<audio id="msgsound">
+  <source src="msgsound.mp3" type="audio/mpeg">
+  <source src="msgsound.ogg" type="audio/ogg">
+  <source src="msgsound.wav" type="audio/wav">
+  Audio nicht unterstützt!
+</audio>
+
+
+
+</body>
+</html>

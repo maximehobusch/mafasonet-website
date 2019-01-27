@@ -1,0 +1,27 @@
+:root {
+	--textcolor1: rgba(0,0,0,0.6);
+	--textcolor2: #ffffff;
+	--textcolorLink: #0000AA;
+	--textcolorAlert: rgba(0,0,0,0.8);
+	--textcolorMe: #ffffff;
+	--textcolorMaster: #ffffff;
+	--textcolorOther: #666666;
+	--textcolorMenubardiv: #004888;
+	--textcolorError: rgba(0,0,0,0.6);
+	--bgcolor1: rgba(255,255,255,0.4);
+	--bgcolor2: rgba(255,255,255,0.3);
+	--bgcolorLink: rgba(120,120,120,0.3);
+	--bgcolorGoodButton: rgba(0,255,0,0.5);
+	--bgcolorBadButton: rgba(220,0,0,0.5);
+	--bgcolorButton: rgba(70,90,180,0.4);
+	--bgcolorAlert: rgba(200,220,255,0.8);
+	--bgcolorMe: rgba(90,110,230,0.5);
+	--bgcolorMaster: rgba(80,80,80,0.5);
+	--bgcolorOther: rgba(255,255,255,0.5);
+	--bgcolorStyleCategorieButton: rgba(255,255,255,0.8);
+	--bgcolorStyleMiniButton: rgba(0,0,0,0.25);
+	--bgcolorMessageWriter: rgba(255,255,255,0.7);
+	--bgcolorError: rgba(255,0,0,0.4);
+	--bordercolor1: rgba(255,255,255,0.0);
+	--bordercolor2: rgba(255,255,255,0.3);
+}
