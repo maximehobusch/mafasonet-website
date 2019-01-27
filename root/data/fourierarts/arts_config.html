@@ -1,0 +1,54 @@
+<html>
+<head>
+<title>Tuchfaltungskunst</title>
+<script src="fjangsformular.js"></script>
+<script>
+const DRAWER_URL = "arts.html";
+const SESSION_STORAGE_KEY = "fjangstffk";
+
+let PARAMETER = [
+{"type":"number","name":"nrsk","value":"512","title":"Anzahl der Ring sekmente"},
+{"type":"number","name":"nask","value":"2000","title":"Animations Einzelringe"},
+{"type":"number","name":"foutt","value":"4","title":"Fouriertiefe Ring"},
+{"type":"number","name":"foutd","value":"3","title":"Fouriertiefe Animation"},
+{"type":"number","name":"foutc","value":"5","title":"Fouriertiefe Farbanimation"},
+{"type":"range","name":"alpha","min":"0","max":"1","step":"0.015625","value":"0.0625","title":"Tranzparenz 0----1"},
+{"type":"range","name":"zoom","min":"2","max":"64","step":"0.5","value":"16","title":"Zoom gross----klein"},
+{"type":"number","name":"nrender","value":"20","title":"Anzahl Einzelringe, die mit einem mal gerendert werden"},
+{"type":"number","name":"nunter","value":"1","title":"Anzahl Unterteilungen"},
+{"type":"range","name":"ndrawunter","min":"0","max":"1","step":"0.015625","value":"1","title":"Anteil gezeichnete Ringe pro Unterteilung 0%----100%"},
+{"type":"text","name":"globalCompositeOperation","value":"screen","title":"globalCompositeOperation (canvas context)"}
+];
+
+
+
+
+onload = function() {
+	let f = FjangsFormular.createInputFormular(PARAMETER,"creator",openw,{"style":"background-color:#FFFFFF"});
+	document.getElementById("p").appendChild(f);
+}
+
+function openw(foup) {
+	let confg = {};
+	confg.nrsk = foup.nrsk*1;
+	confg.nask = foup.nask*1;
+	confg.foutt = foup.foutt*1;
+	confg.foutd = foup.foutd*1;
+	confg.foutc = foup.foutc*1;
+	confg.alpha = foup.alpha*1;
+	confg.zoom = foup.zoom*1;
+	confg.nrender = foup.nrender*1;
+	confg.untersize = Math.ceil(confg.nask/foup.nunter);
+	confg.ndrawuntertotal = Math.round(confg.untersize*foup.ndrawunter);
+	confg.globalCompositeOperation = foup.globalCompositeOperation;
+	sessionStorage.setItem(SESSION_STORAGE_KEY,JSON.stringify(confg));
+	var win = window.open(DRAWER_URL, '_blank');
+	win.focus();
+}
+</script>
+</head>
+<body bgcolor="#000000">
+<p id="p"></p>
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation" target="_blanc">*globalCompositeOperation</a>
+</body>
+</html>

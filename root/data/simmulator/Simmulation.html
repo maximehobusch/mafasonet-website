@@ -1,0 +1,42 @@
+<html>
+<head>
+<title>Simmulator</title>
+<script src="simmu.js"></script>
+<style>
+.feld {background-color:#EEEEEE; border: solid;border-width: 3; border-color: #999999}
+.feld2 {background-color:#F4F4F4; border: solid;border-width: 2; border-color: #888888}
+.feldcons {background-color:#F4F4F4; border: solid;border-width: 2; border-color: #888888; overflow-y:scroll}
+.knoppNeutral {background-color:#333333; border: solid;border-width: 1; border-color: #000000; color: #FFFFFF; font-size:20}
+.knoppGut {background-color:#33EE33; border: solid;border-width: 1; border-color: #000000; color: #000000; font-size:20}
+.knoppSchlimm {background-color:#EE3333; border: solid;border-width: 1; border-color: #000000; color: #FFFFFF; font-size:20}
+</style>
+</head>
+	<body bgcolor="#777777"><form name="f">
+
+	<table><tr>
+		<td class="feld">
+			Start:<br><textarea class="feld2" cols="60" rows="5" name="sta"></textarea><br><hr width="100%">
+			Programm:<br><textarea class="feld2" cols="60" rows="10" name="prg"></textarea><br><hr width="100%">
+			Diagramm (Auswertung):<br><textarea class="feld2" cols="60" rows="5" name="diapg"></textarea>
+		</td><td class="feld">
+			<canvas width="768" height="512" id="diagrcanvas"></canvas>
+		</td></tr><tr>
+		<td class="feld">
+		<!input type="button" class="knoppNeutral" value="Test">
+		Berechnungs Interval: <input type="text" name="milis" value="25" class="feld2" size="1"> ms<br>
+		Anzahl Berechnungen:<input type="text" name="anz" value="500" class="feld2"  size="1"><br>
+		<input type="button" class="knoppGut" value="Start" onclick="setSimu(sta.value,prg.value,diapg.value);startSimu(milis.value*1,anz.value*1);">
+		<input type="button" class="knoppSchlimm" value="Stop" onclick="cancelSimu()">
+		</td><td class="feld">
+		<div class="feldcons" id="cons" style="height:200px">Konsole<br>-------</div>
+
+		</td></tr></table>
+
+	Name:<input type="text" name="nam" value="" class="knoppNeutral"  size="10">
+	<input type="button" class="knoppGut" value="Speichern (localStorage)" onclick="saveInLocalStorage(nam.value,getSimuSaveJSON(sta.value,prg.value,diapg.value,milis.value*1,anz.value*1)); printLocalStorageList()"><input type="button" class="knoppGut" value="JSON Ausgeben" onclick="consoleSet(getSimuSaveJSON(sta.value,prg.value,diapg.value,milis.value*1,anz.value*1)); alert('Json wurde in Konsole ausgegeben')"><br> <br>
+	<span id="selectField">bitte warten...</span><input type="button" class="knoppGut" value="Laden" onclick="if (selectField.value != '') {nam.value = loadStoName.value; var d = JSON.parse(localStorage.getItem(LOCAL_STORAGE_PRE_NAME + loadStoName.value)); sta.value = d.start; prg.value = d.loop; diapg.value = d.end; milis.value = d.dctm; anz.value = d.nloop}">
+	<!input type="button" class="knoppSchlimm" value="Loschen" onclick="deleteProgrammLocalStorage(loadStoName.value); printLocalStorageList()"><br>
+	<input type="button" class="knoppGut" value="JSON Einlesen" onclick="nam.value = '';var d = JSON.parse(prompt('JSON:')); sta.value = d.start; prg.value = d.loop; diapg.value = d.end; milis.value = d.dctm; anz.value = d.nloop">
+
+</form></body>
+</html>

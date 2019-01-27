@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Simmulator</title>
+<script src="simaker.js"></script>
+<style>
+.feld {background-color:#EEEEEE; border: solid;border-width: 3; border-color: #999999}
+.feld2 {background-color:#F4F4F4; border: solid;border-width: 2; border-color: #888888}
+.feld3 {background-color:#FFFFEE; border: solid;border-width: 1; border-color: #777777}
+.knoppNeutral {background-color:#333333; border: solid;border-width: 1; border-color: #000000; color: #FFFFFF; font-size:20}
+.knoppGut {background-color:#33EE33; border: solid;border-width: 1; border-color: #000000; color: #000000; font-size:20}
+.knoppSchlimm {background-color:#EE3333; border: solid;border-width: 1; border-color: #000000; color: #FFFFFF; font-size:20}
+</style>
+</head>
+<body bgcolor="#777777"><form name="f" class="feld">
+<h1>Simmulator</h1>
+<h2>Start:</h2><p><textarea class="feld2" rows="3" cols="80" id="startprg" onchange="simu.changeStartPrg(this.value)"></textarea></p>
+<h2>Loop Programm:</h2><p><textarea class="feld2" rows="10" cols="80" id="loopprg" onchange="simu.changeLoopPrg(this.value)"></textarea></p>
+<h2>Live Diagramm:</h2><p id="ldia" class="feld2">Laden...</p>
+<h2>Nach der letzten Berechnung:</h2><p><textarea class="feld2" rows="10" cols="80" id="endprg" onchange="simu.changeEndPrg(this.value)"></textarea></p>
+<h2>Auswertungs Diagramm:</h2><p id="adia" class="feld2">Laden...</p>
+<input type="button" value="Start" onclick="localStorage.setItem(LOCAL_STORAGE_RUN, simu.getSiJSON()); var win = window.open(URL_SIMMULATOR, '_blank'); win.focus();">
+Berechnungs Interval: <input type="text" value="25" id="dctm" class="feld2" size="3" onchange="simu.setDctm(this.value)"> ms<br>
+Anzahl Berechnungen:<input type="text" value="1000" id="nloop" class="feld2"  size="3" onchange="simu.setNloop(this.value)"><br>
+<input type="button" value="Ausführbares JSON ausgeben" onclick="alert(simu.getSiJSON());"><br>
+<form name="f">
+<select id="sl" name="ladeauswahl"></select><input type="button" onclick="loadWithLadeauswahl(ladeauswahl.value)" value="Laden">
+<input type="button" value="JSON einlsesen" onclick="loadWithJSON(prompt('Simmulations Speicher JSON:'));"><br>
+<input type="button" value="Simmulation speichern (Browser Storage)" onclick="saveInLocalStorage(simu.getSaJSON());">
+<input type="button" value="Speicher JSON ausgeben" onclick="alert(simu.getSaJSON());">
+</form>
+<div class="feld">
+<h1>Wichtigstes zu JavaScript:</h1>
+<p><h2>Variable Erstellen:</h2>var variablenname = wert;<br><b>Beispiel: Erstellt Variable a und setzt auf 10.5:</b><br>var a = 10.5;</p>
+
+<p><h2>Variablen Inhalt verändern:</h2>variablenname = neuerwert;<br><b>Beispiel: Setzt Variable a auf 11.5:</b><br>a = 11.5;</p>
+
+<p><h2>Rechnen:</h2><b>Beispiel1: Addiert a und b und speichert den Inhalt in der neuen Variable c:</b><br>var c = a+b;<br>
+<b>Beispiel2: Dividiert a und b und speichert den Inhalt in der neuen Variable c:</b><br>var c = a-b;<br>
+<b>Beispiel3: Multipliziert a und b und speichert den Inhalt in der neuen Variable c:</b><br>var c = a*b;<br>
+<b>Beispiel4: Dividiert a und b und speichert den Inhalt in der neuen Variable c:</b><br>var c = a/b;<br>
+<b>Klammern können auch gesetzt werden:</b> var c = (a+b)/c<br>
+<b>Potenzieren:</b> var potenz = Math.pow(basis,exponent);<br>
+<b>Quadratwurzel:</b> var wurzel = Math.sqrt(x);<br>
+<b>Logarithmus (Basis e):</b> var c = Math.log(potenz);<br>
+<b>Betrag:</b> var c = Math.abs(x);<br>
+<b>Vorzeichen (wenn positiv 1, wenn negativ -1, wenn 0 dann 0:</b> var c = Math.sign(x);<br>
+<b>Winkelfunktionen (Bogenmaß):</b> var sinus = Math.sin(x); var cosinus = Math.cos(x); var tangens = Math.cos(x);<br>
+<b>Winkelfunktions Umkehrungen (Bogenmaß):</b> var arcussinus = Math.asin(x); var  arcuscosinus = Math.acos(x); var  arcustangens = Math.acos(x);<br>
+<b>Rest:</b> var rest = zahl%teiler;
+</p>
+
+<p><h2>Konstaten:</h2>
+<b>Pi:</b> var pi = Math.PI;<br>
+<b>Eulersche Zahl:</b> var e = Math.E;<br>
+<b>Wurzel aus 2:</b> var x = Math.SQRT2;<br>
+<b>1/2 Wurzel aus 2:</b> var x = Math.SQRT1_2;
+</p>
+
+<p><h2>Bedingungen:</h2>
+if (Bedingungen) {<br>
+...<br>
+}<br>
+<b><br>oder<br></b><br>
+if (Bedingungen) {<br>
+...<br>
+} else {<br>
+...<br>
+}<br>
+<h3>Bedingungen:</h3>
+<b>Wenn a gleich b:</b> a == b<br>
+<b>Wenn a ungleich b:</b> a != b<br>
+<b>Wenn a größer b:</b> a > b<br>
+<b>Wenn a größergleich b:</b> a >= b<br>
+<b>Wenn a kleiner b:</b> a &lt; b<br>
+<b>Wenn a kleinergleich b:</b> a <= b<br>
+<b>Wenn a gleich b und c gleich d:</b> a == b && c == d<br>
+<b>Wenn a gleich b oder c gleich d:</b> a == b || c == d<br>
+<b>Wenn a gleich b xoder c gleich d:</b> a == b ^ c == d<br>
+<b>Wenn Nicht (a gleich b):</b> !(a == b)<br>
+</p>
+<h2>Sinnvolles:</h2>
+<b>Textdialog anzeigen: </b>alert("ein Text...")<br>
+<b>Eingabe dialog anzeigen und eingabe in Variable x speichern: Für Text: </b>x = prompt("eine Frage..."); <b>Nur für Zahl:</b> x = prompt("eine Frage...")*1;<br>
+</div></body>

@@ -1,0 +1,314 @@
+<html>
+<head>
+<meta charset="utf-8"></meta>
+<title>Image Creator</title>
+<script type="text/javascript" src="draggable.js"></script>
+<script type="text/javascript" src="examples.js"></script>
+<script type="text/javascript">
+const LOCSTPRE = "FjImgCre_";
+const LOCSTLIST = "FjImgCreList";
+const startPath = "var:mandelbrot";
+const ww = new Worker('ww.js');
+let canvas;
+let ctx;
+let cam = {"x":-2,"y":-1,"z":256,"w":1024,"h":512};
+let CHUNK_SIZE = 128;
+let NINNER = 2;
+let toRender = [];
+let renderActive = false;
+let winMen;
+let func;
+let cfunc;
+onload = function() {
+    canvas = document.getElementById("canv");
+    ctx = canvas.getContext("2d");
+    ww.addEventListener('message', omsg);
+    updateCam(-2,-1,256,1024,512);
+    CHUNK_SIZE = document.getElementById("chsize").value*1;
+    NINNER = document.getElementById("ninner").value*1;
+
+    winMen = new WindowMeneger(document.getElementById("mainDiv"),document.getElementById("mainValue"));
+    winMen.addWindow(FjWindow.divToWindow(document.getElementById("canvasW"),"Bild"),true);
+    winMen.addWindow(FjWindow.divToWindow(document.getElementById("funcW"),"Funktion"),true);
+    winMen.addWindow(FjWindow.divToWindow(document.getElementById("fastcamW"),"Kamera"),true);
+    winMen.addWindow(FjWindow.divToWindow(document.getElementById("camW"),"Kamera (2)"),true);
+    winMen.addWindow(FjWindow.divToWindow(document.getElementById("qualiW"),"Qualität"),true);
+    winMen.addWindow(FjWindow.divToWindow(document.getElementById("testWnd"),"Hilfe"),true);
+    winMen.addWindow(FjWindow.divToWindow(document.getElementById("loadW"),"Laden"),true);
+    winMen.addWindow(FjWindow.divToWindow(document.getElementById("saveW"),"Speichern"),true);
+
+    winMen.hideAll();
+    winMen.getWindowByName("Bild").setPosition(3,130);
+    winMen.getWindowByName("Bild").setVisible(true);
+    winMen.getWindowByName("Kamera").setPosition(3,40);
+    winMen.getWindowByName("Kamera").setVisible(true);
+    winMen.getWindowByName("Laden").setPosition(200,40);
+    winMen.getWindowByName("Laden").setVisible(true);   
+    winMen.getWindowByName("Qualität").setPosition(500,40);
+    winMen.getWindowByName("Qualität").setVisible(true); 
+    
+    document.getElementById("downlImg").setAttribute("href", canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+    showLoadList(loadList());
+    loadP(startPath);
+}
+function renderImage(chunkSize,ninner) {
+    toRender = [];
+    renderRequest(cam.x,cam.y,1/cam.z*cam.w/chunkSize,1/cam.z*cam.h/chunkSize,chunkSize,chunkSize,1);
+    for (let y = 0; y < cam.h; y=y+chunkSize) for (let x = 0; x < cam.w; x=x+chunkSize) {
+        renderRequest(cam.x+x/cam.z,cam.y+y/cam.z,1/cam.z,1/cam.z,Math.min(chunkSize,Math.floor(cam.w-x)),Math.min(chunkSize,Math.floor(cam.h-y)),ninner);
+    }
+}
+function renderRequest(ox,oy,sx,sy,nx,ny,ninner) {
+    toRender.push({"action":"calc",ox,oy,sx,sy,nx,ny,ninner});
+    if (!renderActive) nextRenderRequestSend();
+}
+function nextRenderRequestSend() {
+    if (toRender.length == 0) {
+        renderActive = false;
+        return;
+    }
+    ww.postMessage(toRender[0]);
+    renderActive = true;
+    let trn = [];
+    for (let i = 1; i < toRender.length; i++) trn.push(toRender[i]);
+    toRender = trn;
+}
+function functionChangeRequest(ftxt) {
+    ww.postMessage({"action":"set","variable":"f","value":ftxt});
+    document.getElementById("f").value = ftxt;
+    func = ftxt;
+}
+function colorChangeRequest(r,g,b,a) {
+    ww.postMessage({"action":"set","variable":"c","value":{r,g,b,a}});
+    document.getElementById("r").value = r;
+    document.getElementById("g").value = g;
+    document.getElementById("b").value = b;
+    document.getElementById("a").value = a;
+    cfunc = {r,g,b,a};
+}
+function setNinner(n) {
+    NINNER = n;
+    renderImage(CHUNK_SIZE,NINNER);
+    document.getElementById("ninner").value = n;
+}
+function setChSize(n) {
+    CHUNK_SIZE = n;
+    renderImage(CHUNK_SIZE,NINNER);
+    document.getElementById("chsize").value = n;
+}
+function omsg(e) {
+    let msg = e.data;
+    if (msg.type == "status") console.log(msg.value);
+    if (msg.type == "imagedata") {
+        nextRenderRequestSend();
+        show(msg);
+    }
+}
+function show(part) {
+    let wOld = part.nx;
+    let hOld = part.ny;
+    let w = Math.ceil(part.nx*part.sx*cam.z);
+    let h = Math.ceil(part.ny*part.sy*cam.z);
+    let x = Math.round((part.ox-cam.x)*cam.z);
+    let y = Math.round((part.oy-cam.y)*cam.z);
+    ctx.putImageData(new ImageData(getZoomedImage(part.value,wOld,hOld,w,h),w),x,y);
+}
+function getZoomedImage(parr,wOld,hOld,w,h) {
+    let zx = wOld/w;
+    let zy = hOld/h;
+    let rt = new Uint8ClampedArray(w*h*4);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        let ia = (Math.floor(x*zx)+Math.floor(y*zy)*wOld)*4;
+        let i = (x+y*w)*4;
+        rt[i] = parr[ia];
+        rt[i+1] = parr[ia+1];
+        rt[i+2] = parr[ia+2];
+        rt[i+3] = parr[ia+3];
+
+    }
+    return rt;
+}
+function createImage(idata) {
+    var c = document.createElement('canvas');
+    var x = canvas.getContext('2d');
+    c.width = idata.width;
+    c.height = idata.height;
+    x.putImageData(idata, 0, 0);
+    var i = new Image();
+    i.src = c.toDataURL();
+    return i;
+}
+function updateCam(x,y,z,w,h) {
+    cam = {x,y,z,w,h};
+    if (canvas.width != w) canvas.width = w;
+    if (canvas.height != h) canvas.height = h;
+    document.getElementById('ox').value = x;
+    document.getElementById('oy').value = y;
+    document.getElementById('z').value = z;
+    document.getElementById('w').value = w;
+    document.getElementById('h').value = h;
+    renderImage(CHUNK_SIZE,NINNER);
+}
+function load(json) {
+    loadO(JSON.parse(json));
+}
+function loadO(d) {
+    if (d.quality != undefined) setNinner(d.quality);
+    if (d.func != undefined) functionChangeRequest(d.func);
+    if (d.cfunc != undefined) colorChangeRequest(d.cfunc.r, d.cfunc.g, d.cfunc.b, d.cfunc.a);
+    if (d.cam != undefined) updateCam(d.cam.x,d.cam.y,d.cam.z,d.cam.w,d.cam.h);
+    renderImage(CHUNK_SIZE,NINNER);
+}
+function loadP(pth) {
+    let ix = pth.indexOf(":");
+    let ty = pth.substring(0,ix);
+    let na = pth.substring(ix+1,pth.length);
+    if (ty == "var") {
+        load(JSON.stringify(EXAMPLES[na]));
+    } else if (ty == "loc") {
+        load(localStorage.getItem(LOCSTPRE + na));
+    }
+}
+function save() {
+    let rt = {};
+    rt.cam = cam;
+    rt.func = func;
+    rt.cfunc = cfunc;
+    rt.quality = NINNER;
+    return JSON.stringify(rt);
+}
+function saveInLocalStorage(json,name) {
+    let l = loadLocList();
+    let inList = false;
+    for (let i = 0; i < l.length; i++) {
+        if (l[i] == name) inList = true;
+    }
+    if (!inList) l.push(name);
+    localStorage.setItem(LOCSTPRE + name,json);
+    localStorage.setItem(LOCSTLIST,JSON.stringify(l));
+    showLoadList(loadList());
+}
+function loadLocList() {
+    try {
+        let r = JSON.parse(localStorage.getItem(LOCSTLIST));
+        if (r == undefined) r = [];
+        return r;
+    } catch (e) {
+        return [];
+    }
+}
+
+
+function loadList() {
+    let ex = Object.keys(EXAMPLES);
+    let lst = [];
+    for (let i = 0; i < ex.length; i++) {
+        lst.push("var:" + ex[i]);
+    }
+    let loc = loadLocList();
+    for (let i = 0; i < loc.length; i++) {
+        lst.push("loc:" + loc[i]);
+    }
+    return lst;
+}
+function showLoadList(lst) {
+    let slct = document.getElementById("whatload");
+    slct.innerHTML = "";
+    for (let i = 0; i < lst.length; i++) {
+        let o = document.createElement("option");
+        o.value = lst[i];
+        let ix = lst[i].indexOf(":");
+        o.innerHTML = lst[i].substring(ix+1,lst[i].length) + " (" + lst[i].substring(0,ix) + ")";
+        slct.appendChild(o);
+    }
+}
+</script>
+</head>
+<style>
+.floating {background-color:rgba(255,255,255,0.2);position:fixed; top:0; left:0; border-radius:10px; border-style:solid; border-width:4; border-color:#000000;  box-sizing: border-box; margin:10px; padding:10px;}
+body {
+    background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAHklEQVQYlWO4e/fuf2S8atUqFMxABwXoAuga6KAAAGqM0mF5TvElAAAAAElFTkSuQmCC)
+}
+</style>
+<style>
+.mainBar {background-color:rgba(150,150,150,1);}
+.windowMain {background-color:rgba(255,255,255,1);position:absolute; top:0; left:0; margin:0px; padding:0px; border-style:solid; border-width:2px; border-color:#000000;  box-sizing: border-box;  border-radius:4px;}
+.windowHead {background-color:rgba(100,200,200,1)}
+.windowMinimizeSpan {background-color:rgba(200,50,0,1); cursor:default}
+</style>
+<body style="margin:0px;">
+<div id="mainDiv" style="width:100%; height:100%; overflow:hidden">
+<div id="mainValue">
+
+<div class="windowMain" id="canvasW">
+    <canvas id="canv" width="1024" height="512"></canvas>
+</div>
+
+<div class="windowMain" id="testWnd">
+    <iframe src="help.html" width="600px" height="400px"></iframe> 
+</div>
+
+<div class="windowMain" id="funcW">
+    Funktion v = f(x,y):<br>
+    <textarea id="f" rows="10" cols="50">
+let r = 0;
+let i = 0;
+for (let n = 0; n < 1000; n++) {
+    let ra = r;
+    r = r*r - i*i + x;
+    i = 2*ra*i + y;
+    if (r*r + i*i > 4) return n/100;
+}
+return Infinity;
+    </textarea><br>
+    Farbe (byte ;0-255):<br>
+    Rot<br><textarea rows="1" cols="50" id="r">
+if (v == Infinity) return 0;
+return Math.round((Math.sin(v-2.0943951023931953)+1)*127.5);
+    </textarea><br>
+    Grün<br><textarea  rows="1" cols="50" id="g">
+if (v == Infinity) return 0;
+return Math.round((Math.sin(v-4.1887902047863905)+1)*127.5);
+    </textarea><br>
+    Blau<br><textarea rows="1" cols="50" id="b">
+if (v == Infinity) return 0;
+return Math.round((Math.sin(v)+1)*127.5);
+    </textarea><br>
+    Alpha<br><textarea rows="1" cols="50" id="a">
+    return 255;
+    </textarea><br>
+    <input type="button" value="SET" onclick="functionChangeRequest(document.getElementById('f').value); colorChangeRequest(document.getElementById('r').value,document.getElementById('g').value,document.getElementById('b').value,document.getElementById('a').value); renderImage(CHUNK_SIZE,NINNER);">
+</div>
+
+<div class="windowMain" id="camW">
+    Kamera:<br>
+    x (linkeObereEcke): <input type="text" value="-2" id="ox"><br>
+    y (linkeObereEcke): <input type="text" value="-2" id="oy"><br>
+    zoom (1px=zoom Einheiten): <input type="text" value="512" id="z"><br>
+    breite: <input type="text" value="5" id="w"><br>
+    höhe: <input type="text" value="-2" id="h"><br>
+    <input type="button" value="SET" onclick="updateCam(document.getElementById('ox').value*1,document.getElementById('oy').value*1,document.getElementById('z').value*1,document.getElementById('w').value*1,document.getElementById('h').value*1)">
+</div>
+<div class="windowMain" id="fastcamW">
+    <input type="button" value="+" onclick="updateCam(cam.x+cam.w/cam.z*(1-1/1.1)/2,cam.y+cam.h/cam.z*(1-1/1.1)/2,cam.z*1.1,cam.w,cam.h)"><input type="button" value="A"  onclick="updateCam(cam.x,cam.y-0.1/cam.z*cam.h,cam.z,cam.w,cam.h)"><input type="button" value="-" onclick="updateCam(cam.x+cam.w/cam.z*(1-1.1)/2,cam.y+cam.h/cam.z*(1-1.1)/2,cam.z/1.1,cam.w,cam.h)"><br>
+    <input type="button" value="<" onclick="updateCam(cam.x-0.1/cam.z*cam.w,cam.y,cam.z,cam.w,cam.h)"><input type="button" value="V"onclick="updateCam(cam.x,cam.y+0.1/cam.z*cam.h,cam.z,cam.w,cam.h)"><input type="button" value=">" onclick="updateCam(cam.x+0.1/cam.z*cam.w,cam.y,cam.z,cam.w,cam.h)">
+</div>
+<div class="windowMain" id="qualiW">
+    Qualität:<br><input type="range" value="1" min="1" max="8" step="1" id="ninner" onchange="setNinner(this.value*1)"><br>
+    Chunk Größe:<br><input type="range" value="128" min="16" max="256" step="16" id="chsize" onchange="setChSize(this.value*1);">
+</div>
+<div class="windowMain" id="loadW">
+Verfügbar:<br>
+<select id="whatload" onchange="loadP(this.value)"></select><br>Daten eingeben:<br><input type="button" value="JSON" onclick="load(prompt('JSON Text'))">
+</div>
+<div class="windowMain" id="saveW">
+Bild herunterladen:<br>
+<a id="downlImg" download="" href="404"><input type="button" value="Herunterladen" onclick=""></a>
+<br><br>
+Einstellung speichern:<br>
+<input type="button" value="LocalStorage (Im Speicher deines Browsers)" onclick="saveInLocalStorage(save(),prompt('name'));"><br>
+</div>
+</div>
+</div>
+<body>
+</html>

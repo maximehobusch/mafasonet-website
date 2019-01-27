@@ -1,0 +1,100 @@
+<html>
+<head>
+<title>Tuchfaltungskunst</title>
+<script src="kunst.js"></script>
+<script>
+const SESSION_STORAGE_KEY = "fjangstffk";
+
+let data;
+let confg = {"nrsk":512,"nask":2000,"foutt":4,"foutd":3,"foutc":5,"alpha":0.0625,"zoom":16,"nrender":20,"untersize":2000,"ndrawuntertotal":2000,"globalCompositeOperation":"screen"};
+onload = function() {
+	loadConfg();
+	draw();
+}
+function loadConfg() {
+	let s = sessionStorage.getItem(SESSION_STORAGE_KEY);
+	if (s == undefined) {
+		alert("No Configuration in session storage!\n--> Running with default configuration");
+		return;
+	}
+	if (s == "") {
+		alert("No Configuration in session storage!\n--> Running with default configuration");
+		return;
+	}
+	try {
+		confg = JSON.parse(s);
+	} catch (e) {
+		alert("JSON Error in Configuration (" + e + ")!\n--> Running with default configuration");
+	}
+}
+
+function createRandomFourierAnimation(l,m,lc) {
+	return new FourierAnimation(randomFourierTables(l,m),randomFourierTables(l,m),randomFourierTables(l,m),randomFourierTables(l,m), randomFourierTable(lc,4.0/lc),randomFourierTable(lc,4.0/lc),randomFourierTable(lc,4.0/lc));
+	function randomList(l,mini,maxi) {
+		let ret = [];
+		for (let i = 0; i < l; i++) {
+			ret.push(mini + Math.random()*(maxi-mini));
+		}
+		return ret;
+	}
+	function randomFourierTable(l,z) {
+		return new FourierTable(randomList(l,-z,z),randomList(l,-z,z));
+	}
+	function randomFourierTables(l,m) {
+		let ret = [];
+		for (let i = 0; i < m; i++) {
+			ret.push(randomFourierTable(l,1));
+		}
+		return ret;
+	}
+}
+
+
+function draw() {
+	let canvas = document.getElementById("c");
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	let w = canvas.width;
+	let h = canvas.height;
+	let d = Math.min(w,h);
+	let ctx = canvas.getContext("2d");
+	ctx.clearRect(0,0,w,h);
+	ctx.lineCa2000p = "round";
+	ctx.lineJoin = "round";
+	ctx.lineWidth = 2;
+	ctx.strokeStyle = "#FFFFFF";
+	ctx.globalCompositeOperation = confg.globalCompositeOperation;
+	let fa = createRandomFourierAnimation(confg.foutd,confg.foutt,confg.foutc);
+//	fa.drawOnCanvas(ctx,w/2,h/2,d/16,d/16,1000, 1000, 1/16, drraaawww);
+	data = {fa,ctx,w,h,d,"offs":0,"offsic":0,"cykl":0,"npdr":40,"inter":window.setInterval(tic,1)};
+}
+function tic() {
+	let n = 0;
+	while (n < confg.nrender) {
+		let dd = Math.min(confg.ndrawuntertotal-data.offsic,confg.nrender-n);
+		data.offsic = data.offsic + dd;
+		data.fa.drawPartOnCanvas(data.ctx,data.w/2,data.h/2,data.d/confg.zoom,data.d/confg.zoom, confg.nrsk, confg.nask, confg.alpha, drraaawww,  data.offs,dd);
+		n = n + dd;
+		data.offs = data.offsic + confg.untersize*data.cykl;
+//		alert(data.offs + " " + dd);
+		if (data.offsic == confg.ndrawuntertotal) {
+			data.offsic = 0;
+			data.cykl++;
+			data.offs = confg.untersize*data.cykl;
+			if (data.offs >= confg.nask) break;
+		}
+	}
+	if (data.offs >= confg.nask) window.clearInterval(data.inter);
+}
+function drraaawww(ctx,d) {
+	ctx.stroke();
+}
+function siiin(d) {
+	return Math.floor(Math.max(0,Math.cos(d))*255);
+}
+</script>
+
+
+</head>
+<body style="margin:0px; padding:0px" bgcolor="#000000"><canvas id="c" width="100" height="100"></canvas></body>
+</html>
