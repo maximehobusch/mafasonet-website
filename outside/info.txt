@@ -1,0 +1,2 @@
+Dateien, die sich hier befinden werden nicht in die Webseite integriert.
+Hier können zum Beispiel Vorlagen oder Rohdaten eingefügt werden.
